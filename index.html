@@ -301,10 +301,10 @@
             let y = 0;
 
             // ---------- Letterhead ----------
-            y = 35;
+            y = 30;
             const logoBoxSize = 48;
             const logoX = margin; // Top left corner
-            const logoY = y - 10;
+            const logoY = y - 12;
 
             if (!logoDataCache) {
                 // Load from file using fetch (works on Netlify or any web server)
@@ -335,14 +335,14 @@
             doc.text(COMPANY.website, textX, y + 14);
             doc.text(COMPANY.address, textX, y + 26);
 
-            y += 45;
+            y += 42;
 
             // Top double rule (formal letterhead look)
             doc.setLineWidth(1.2);
             doc.line(margin, y, pageWidth - margin, y);
             doc.setLineWidth(0.4);
             doc.line(margin, y + 3, pageWidth - margin, y + 3);
-            y += 22;
+            y += 20;
 
             // ---------- Ref No. and Date ----------
             doc.setFont('helvetica', 'normal');
