@@ -313,7 +313,7 @@
 
             // ---------- Letterhead ----------
             y = 30;
-            const logoBoxSize = 48;
+            const logoBoxSize = 58;
             const logoX = margin; // Top left corner
             const logoY = y - 23;
 
@@ -334,7 +334,7 @@
                 }
             }
 
-            const textX = margin + logoBoxSize + 4;
+            const textX = margin + logoBoxSize + 12;
 
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(18);
@@ -346,14 +346,14 @@
             doc.text(COMPANY.website, textX, y + 14);
             doc.text(COMPANY.address, textX, y + 26);
 
-            y += 42;
+            y += 45;
 
             // Top double rule (formal letterhead look)
             doc.setLineWidth(1.2);
             doc.line(margin, y, pageWidth - margin, y);
             doc.setLineWidth(0.4);
             doc.line(margin, y + 3, pageWidth - margin, y + 3);
-            y += 20;
+            y += 18;
 
             // ---------- Ref No. and Date ----------
             doc.setFont('helvetica', 'normal');
