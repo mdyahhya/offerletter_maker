@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offer Letter Maker - Dominal Technology</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+            color: #222;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            width: 100%;
+        }
+
+        @media (min-width: 900px) {
+            .container {
+                grid-template-columns: 1fr 1.3fr;
+                align-items: start;
+            }
+        }
+
+        .form-panel {
+            background: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            font-size: 22px;
+            margin-top: 0;
+            color: #111;
+        }
+
+        /* Button Group & Custom Buttons */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .btn-group button {
+            margin-top: 0;
+            flex: 1;
+        }
+
+        .btn-secondary {
+            background: #2563eb;
+        }
+
+        .btn-secondary:hover {
+            background: #1d4ed8;
+        }
+
+        /* Preview Panel Styling */
+        .preview-panel {
+            background: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+            min-height: 600px;
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+        }
+
+        .preview-header h2 {
+            font-size: 18px;
+            margin: 0;
+            color: #111;
+        }
+
+        .preview-status {
+            font-size: 12px;
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .preview-body {
+            position: relative;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #pdfPreview {
+            width: 100%;
+            height: 680px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            background: #f8fafc;
+            display: none;
+        }
+
+        .preview-placeholder {
+            height: 680px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8fafc;
+            border: 1px dashed #cbd5e1;
+            border-radius: 6px;
+            color: #64748b;
+            text-align: center;
+            padding: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin: 12px 0 4px;
+            font-size: 14px;
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .row>div {
+            flex: 1;
+        }
+
+        button {
+            margin-top: 18px;
+            width: 100%;
+            padding: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #fff;
+            background: #16a34a;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #15803d;
+        }
+
+        .hint {
+            font-size: 12px;
+            color: #777;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="form-panel">
+            <h1>Offer Letter Generator</h1>
+            <p class="hint">Fill in the intern's details below to generate their offer letter.</p>
+
+            <label>Letter Date</label>
+            <input type="date" id="letterDate">
+
+            <label>Intern Full Name</label>
+            <input type="text" id="internName" placeholder="e.g. Rahul Sharma">
+
+            <label>Role / Position</label>
+            <input type="text" id="role" value="Software Development Intern">
+
+            <div class="row">
+                <div>
+                    <label>Internship Duration</label>
+                    <input type="text" id="duration" value="2 Months">
+                </div>
+                <div>
+                    <label>Start Date</label>
+                    <input type="date" id="startDate">
+                </div>
+            </div>
+
+            <label>Offer Reference No. (optional)</label>
+            <input type="text" id="refNo" placeholder="e.g. DT/INT/2026/001">
+
+            <div class="btn-group">
+                <button type="button" class="btn-secondary" onclick="updatePreview()">Update Preview</button>
+                <button type="button" onclick="downloadPDF()">Download PDF</button>
+            </div>
+        </div>
+
+        <div class="preview-panel" id="previewPanel">
+            <div class="preview-header">
+                <h2>Live Preview</h2>
+                <span class="preview-status" id="previewStatus">Ready</span>
+            </div>
+            <div class="preview-body">
+                <iframe id="pdfPreview"></iframe>
+                <div class="preview-placeholder" id="previewPlaceholder">
+                    <p>Click "Update Preview" to see the live letter preview here.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ===========================================================
+           FIXED COMPANY DETAILS - same for every offer letter
+           =========================================================== */
+        const COMPANY = {
+            name: 'Dominal Technology',
+            website: 'dominal.in',
+            logoPath: 'dominalnew.jpeg',          // place logo.jpg in the same folder
+            workMode: 'Remote',
+            stipend: 'Unpaid (Performance-based opportunities available)',
+            signatoryDesignation: 'HR Manager',
+            contactNumber: '8766882442',
+            address: 'Solapur, Maharashtra, India'
+        };
+        /* =========================================================== */
+
+        // Set default dates to today
+        document.getElementById('letterDate').valueAsDate = new Date();
+        document.getElementById('startDate').valueAsDate = new Date();
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            const d = new Date(dateStr);
+            const options = { day: 'numeric', month: 'long', year: 'numeric' };
+            return d.toLocaleDateString('en-GB', options);
+        }
+
+        // Loads an image via fetch (works on any server, no canvas taint issues)
+        function loadImageAsDataURL(path) {
+            return fetch(path)
+                .then(function(res) {
+                    if (!res.ok) throw new Error('Image not found');
+                    return res.blob();
+                })
+                .then(function(blob) {
+                    return new Promise(function(resolve, reject) {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.onerror = () => resolve(null);
+                        reader.readAsDataURL(blob);
+                    });
+                })
+                .catch(function() { return null; });
+        }
+
+        let logoDataCache = null;
+
+        async function buildPDF() {
+            const letterDate = formatDate(document.getElementById('letterDate').value);
+            const internName = document.getElementById('internName').value.trim() || '[Intern Name]';
+            const role = document.getElementById('role').value || 'Software Development Intern';
+            const duration = document.getElementById('duration').value || '';
+            const startDate = formatDate(document.getElementById('startDate').value);
+            const refNo = document.getElementById('refNo').value.trim();
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
+            const margin = 56;
+            const contentWidth = pageWidth - margin * 2;
+            let y = 0;
+
+            // ---------- Letterhead ----------
+            y = 50;
+            const logoBoxSize = 55;
+            const logoX = margin; // Top left corner
+            const logoY = y - 12;
+
+            if (!logoDataCache) {
+                // Load from file using fetch (works on Netlify or any web server)
+                logoDataCache = await loadImageAsDataURL(COMPANY.logoPath);
+            }
+
+            // Draw a white background box for the logo
+            doc.setFillColor(255, 255, 255);
+            doc.rect(logoX, logoY, logoBoxSize, logoBoxSize, 'F');
+
+            if (logoDataCache) {
+                try {
+                    doc.addImage(logoDataCache, 'JPEG', logoX, logoY, logoBoxSize, logoBoxSize);
+                } catch (e) {
+                    logoDataCache = null;
+                }
+            }
+
+            const textX = margin + logoBoxSize + 14;
+
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(20);
+            doc.setTextColor(0, 0, 0);
+            doc.text(COMPANY.name, textX, y);
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(10);
+            doc.text(COMPANY.website, textX, y + 16);
+            doc.text(COMPANY.address, textX, y + 30);
+
+            y += 55;
+
+            // Top double rule (formal letterhead look)
+            doc.setLineWidth(1.2);
+            doc.line(margin, y, pageWidth - margin, y);
+            doc.setLineWidth(0.4);
+            doc.line(margin, y + 3, pageWidth - margin, y + 3);
+            y += 35;
+
+            // ---------- Ref No. and Date ----------
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(10);
+            if (refNo) {
+                doc.text(`Ref No.: ${refNo}`, margin, y);
+            }
+            doc.text(`Date: ${letterDate}`, pageWidth - margin, y, { align: 'right' });
+            y += 28;
+
+            // ---------- To / Recipient ----------
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(11);
+            doc.text('To,', margin, y);
+            y += 16;
+            doc.text(internName, margin, y);
+            y += 24;
+
+            // ---------- Title ----------
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(14);
+            doc.text('Letter of Internship Offer', pageWidth / 2, y, { align: 'center' });
+            y += 26;
+
+            // ---------- Salutation ----------
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(11);
+            doc.text(`Dear ${internName},`, margin, y);
+            y += 22;
+
+            // ---------- Intro paragraph ----------
+            const introText = `We are pleased to offer you the position of ${role} at ${COMPANY.name}. This letter, together with the terms outlined below, sets out the details of your internship with our organisation. Please read the contents carefully.`;
+            const introLines = doc.splitTextToSize(introText, contentWidth);
+            doc.text(introLines, margin, y);
+            y += introLines.length * 15 + 18;
+
+            // ---------- Section: Terms of Internship ----------
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(12);
+            doc.text('1. Terms of Internship', margin, y);
+            y += 20;
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(11);
+
+            const details = [
+                ['Position', role],
+                ['Duration', duration],
+                ['Start Date', startDate],
+                ['Work Mode', COMPANY.workMode],
+                ['Stipend', COMPANY.stipend],
+            ];
+
+            const labelWidth = 130;
+            details.forEach(([label, value]) => {
+                if (!value) return;
+                doc.setFont('helvetica', 'bold');
+                doc.text(label, margin + 14, y);
+                doc.setFont('helvetica', 'normal');
+                doc.text(':', margin + 14 + labelWidth - 8, y);
+                const valLines = doc.splitTextToSize(String(value), contentWidth - labelWidth - 30);
+                doc.text(valLines, margin + 14 + labelWidth, y);
+                y += Math.max(18, valLines.length * 15);
+            });
+
+            y += 6;
+
+            // ---------- Section: What You Will Get ----------
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(12);
+            doc.text('2. What You Will Receive', margin, y);
+            y += 20;
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(11);
+            const benefits = [
+                'An internship completion certificate (hard copy provided) upon successful completion.',
+                'Guidance and support in building your own portfolio projects.',
+                'Mentorship on approaching, communicating with, and acquiring clients.',
+                'Guidance on job readiness and placement preparation.',
+                'The opportunity to work on live, industry-level software projects alongside our team.'
+            ];
+            benefits.forEach((b) => {
+                const lines = doc.splitTextToSize(b, contentWidth - 20);
+                doc.text('•', margin + 4, y);
+                doc.text(lines, margin + 18, y);
+                y += lines.length * 15;
+            });
+
+            y += 10;
+
+            // ---------- Section: Roles & Responsibilities ----------
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(12);
+            doc.text('3. Roles & Responsibilities', margin, y);
+            y += 20;
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(11);
+            const responsibilities = [
+                'Work on assigned and existing projects under the direct guidance of senior developers.',
+                'Follow daily assignments, instructions, and established company workflows.',
+                'Actively participate in team meetings and business strategy discussions.',
+                'Maintain professionalism, punctuality, and confidentiality of all company and client information.'
+            ];
+            responsibilities.forEach((b) => {
+                const lines = doc.splitTextToSize(b, contentWidth - 20);
+                doc.text('•', margin + 4, y);
+                doc.text(lines, margin + 18, y);
+                y += lines.length * 15;
+            });
+
+            y += 10;
+
+            // Page-break check before terms/closing
+            if (y > pageHeight - 230) {
+                doc.addPage();
+                y = 60;
+            }
+
+            // ---------- Section: General Terms ----------
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(12);
+            doc.text('4. General Terms', margin, y);
+            y += 20;
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(11);
+            const generalTerms = [
+                'This offer is extended on the understanding that the information provided by you is accurate and true to the best of your knowledge.',
+                'The Company reserves the right to terminate or extend this internship based on performance, conduct, and organisational requirements.',
+                'During the internship, you may have access to confidential business information and are expected to maintain strict confidentiality both during and after the internship period.'
+            ];
+            generalTerms.forEach((b) => {
+                const lines = doc.splitTextToSize(b, contentWidth - 20);
+                doc.text('•', margin + 4, y);
+                doc.text(lines, margin + 18, y);
+                y += lines.length * 15;
+            });
+
+            y += 14;
+
+            // Page-break check before closing
+            if (y > pageHeight - 170) {
+                doc.addPage();
+                y = 60;
+            }
+
+            // ---------- Closing ----------
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(11);
+            const closingText = `We are excited to have you join us and look forward to a productive and rewarding internship experience. Please feel free to contact us if you have any questions regarding the terms of this offer.`;
+            const closingLines = doc.splitTextToSize(closingText, contentWidth);
+            doc.text(closingLines, margin, y);
+            y += closingLines.length * 15 + 14;
+
+            doc.text('Welcome to the team. We wish you a great learning experience ahead!', margin, y);
+            y += 36;
+
+            // ---------- Signature block ----------
+            doc.text('Yours sincerely,', margin, y);
+            y += 18;
+
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(12);
+            doc.text(`For ${COMPANY.name}`, margin, y);
+            y += 50;
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(11);
+            doc.text(COMPANY.signatoryDesignation, margin, y);
+            y += 15;
+            doc.text(COMPANY.name, margin, y);
+            y += 15;
+            doc.text(`Contact (WhatsApp): ${COMPANY.contactNumber}`, margin, y);
+            y += 15;
+            doc.text(COMPANY.website, margin, y);
+
+            // ---------- Footer on every page ----------
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(8);
+                doc.setTextColor(120, 120, 120);
+                doc.text(
+                    `${COMPANY.name} | ${COMPANY.website} | This is a system-generated offer letter.`,
+                    pageWidth / 2,
+                    pageHeight - 30,
+                    { align: 'center' }
+                );
+                doc.setTextColor(0, 0, 0);
+            }
+
+            return doc;
+        }
+
+        let previewBlobUrl = null;
+
+        async function updatePreview() {
+            const statusEl = document.getElementById('previewStatus');
+            if (statusEl) {
+                statusEl.textContent = 'Updating...';
+                statusEl.style.background = '#fef3c7';
+                statusEl.style.color = '#d97706';
+            }
+
+            try {
+                const doc = await buildPDF();
+                
+                // Revoke previous blob URL to avoid memory leak
+                if (previewBlobUrl) {
+                    URL.revokeObjectURL(previewBlobUrl);
+                }
+
+                const blob = doc.output('blob');
+                previewBlobUrl = URL.createObjectURL(blob);
+
+                const iframe = document.getElementById('pdfPreview');
+                const placeholder = document.getElementById('previewPlaceholder');
+                
+                if (iframe) {
+                    iframe.src = previewBlobUrl;
+                    iframe.style.display = 'block';
+                }
+                if (placeholder) {
+                    placeholder.style.display = 'none';
+                }
+
+                if (statusEl) {
+                    statusEl.textContent = 'Preview Updated';
+                    statusEl.style.background = '#dcfce7';
+                    statusEl.style.color = '#15803d';
+                    
+                    setTimeout(() => {
+                        statusEl.textContent = 'Live Preview';
+                        statusEl.style.background = '#e0f2fe';
+                        statusEl.style.color = '#0369a1';
+                    }, 2000);
+                }
+            } catch (err) {
+                console.error("Error generating preview:", err);
+                if (statusEl) {
+                    statusEl.textContent = 'Error';
+                    statusEl.style.background = '#fee2e2';
+                    statusEl.style.color = '#b91c1c';
+                }
+            }
+        }
+
+        async function downloadPDF() {
+            const doc = await buildPDF();
+            const internName = document.getElementById('internName').value.trim() || 'Intern';
+            const fileName = `Offer_Letter_${internName.replace(/\s+/g, '_')}.pdf`;
+            doc.save(fileName);
+        }
+
+        // Render initial preview on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            updatePreview();
+        });
+    </script>
+
+</body>
+
+</html>
