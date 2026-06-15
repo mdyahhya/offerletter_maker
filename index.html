@@ -229,7 +229,8 @@
                 <button type="button" class="btn-secondary" onclick="updatePreview()">Update Preview</button>
                 <button type="button" onclick="downloadPDF()">Download PDF</button>
             </div>
-            <button type="button" class="btn-purple" style="margin-top: 10px;" onclick="downloadImage()">Download Image (HD PNG)</button>
+            <button type="button" class="btn-purple" style="margin-top: 10px;" onclick="downloadImage()">Download Image
+                (HD PNG)</button>
         </div>
 
         <div class="preview-panel" id="previewPanel">
@@ -276,19 +277,19 @@
         // Loads an image via fetch (works on any server, no canvas taint issues)
         function loadImageAsDataURL(path) {
             return fetch(path)
-                .then(function(res) {
+                .then(function (res) {
                     if (!res.ok) throw new Error('Image not found');
                     return res.blob();
                 })
-                .then(function(blob) {
-                    return new Promise(function(resolve, reject) {
+                .then(function (blob) {
+                    return new Promise(function (resolve, reject) {
                         const reader = new FileReader();
                         reader.onloadend = () => resolve(reader.result);
                         reader.onerror = () => resolve(null);
                         reader.readAsDataURL(blob);
                     });
                 })
-                .catch(function() { return null; });
+                .catch(function () { return null; });
         }
 
         let logoDataCache = null;
@@ -527,7 +528,7 @@
                 doc.setFontSize(8);
                 doc.setTextColor(120, 120, 120);
                 doc.text(
-                    `${COMPANY.name} | ${COMPANY.website} | This is a system-generated offer letter.`,
+                    `${COMPANY.name} | ${COMPANY.website}`,
                     pageWidth / 2,
                     pageHeight - 30,
                     { align: 'center' }
@@ -550,7 +551,7 @@
 
             try {
                 const doc = await buildPDF();
-                
+
                 // Revoke previous blob URL to avoid memory leak
                 if (previewBlobUrl) {
                     URL.revokeObjectURL(previewBlobUrl);
@@ -561,7 +562,7 @@
 
                 const iframe = document.getElementById('pdfPreview');
                 const placeholder = document.getElementById('previewPlaceholder');
-                
+
                 if (iframe) {
                     iframe.src = previewBlobUrl;
                     iframe.style.display = 'block';
@@ -574,7 +575,7 @@
                     statusEl.textContent = 'Preview Updated';
                     statusEl.style.background = '#dcfce7';
                     statusEl.style.color = '#15803d';
-                    
+
                     setTimeout(() => {
                         statusEl.textContent = 'Live Preview';
                         statusEl.style.background = '#e0f2fe';
@@ -613,25 +614,25 @@
 
                 const doc = await buildPDF();
                 const arrayBuffer = doc.output('arraybuffer');
-                
+
                 const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
                 const page = await pdf.getPage(1);
-                
+
                 // Scale 3.5 gives super high definition output (approx 2900x4100 pixels)
                 const scale = 3.5;
                 const viewport = page.getViewport({ scale: scale });
-                
+
                 const canvas = document.createElement('canvas');
                 canvas.width = viewport.width;
                 canvas.height = viewport.height;
                 const context = canvas.getContext('2d');
-                
+
                 // Render page to canvas
                 await page.render({
                     canvasContext: context,
                     viewport: viewport
                 }).promise;
-                
+
                 // Trigger download as PNG
                 const internName = document.getElementById('internName').value.trim() || 'Intern';
                 const link = document.createElement('a');
