@@ -322,9 +322,6 @@
                 logoDataCache = await loadImageAsDataURL(COMPANY.logoPath);
             }
 
-            // Draw a white background box for the logo
-            doc.setFillColor(255, 255, 255);
-            doc.rect(logoX, logoY, logoBoxSize, logoBoxSize, 'F');
 
             if (logoDataCache) {
                 try {
