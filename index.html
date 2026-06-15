@@ -322,16 +322,30 @@
                 logoDataCache = await loadImageAsDataURL(COMPANY.logoPath);
             }
 
+            let textX = margin + logoBoxSize + 12;
 
             if (logoDataCache) {
                 try {
-                    doc.addImage(logoDataCache, 'JPEG', logoX, logoY, logoBoxSize, logoBoxSize);
+                    const img = new Image();
+                    img.src = logoDataCache;
+                    await new Promise((resolve) => {
+                        img.onload = resolve;
+                        img.onerror = resolve;
+                    });
+                    const imgWidth = img.naturalWidth || 1;
+                    const imgHeight = img.naturalHeight || 1;
+                    const aspectRatio = imgWidth / imgHeight;
+
+                    const logoHeight = logoBoxSize;
+                    const logoWidth = logoHeight * aspectRatio;
+
+                    doc.addImage(logoDataCache, 'JPEG', logoX, logoY, logoWidth, logoHeight);
+                    textX = margin + logoWidth + 12;
                 } catch (e) {
+                    doc.addImage(logoDataCache, 'JPEG', logoX, logoY, logoBoxSize, logoBoxSize);
                     logoDataCache = null;
                 }
             }
-
-            const textX = margin + logoBoxSize + 12;
 
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(18);
