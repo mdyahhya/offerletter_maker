@@ -296,15 +296,15 @@
 
             const pageWidth = doc.internal.pageSize.getWidth();
             const pageHeight = doc.internal.pageSize.getHeight();
-            const margin = 56;
+            const margin = 45;
             const contentWidth = pageWidth - margin * 2;
             let y = 0;
 
             // ---------- Letterhead ----------
-            y = 50;
-            const logoBoxSize = 55;
+            y = 35;
+            const logoBoxSize = 48;
             const logoX = margin; // Top left corner
-            const logoY = y - 12;
+            const logoY = y - 10;
 
             if (!logoDataCache) {
                 // Load from file using fetch (works on Netlify or any web server)
@@ -323,70 +323,70 @@
                 }
             }
 
-            const textX = margin + logoBoxSize + 14;
+            const textX = margin + logoBoxSize + 12;
 
             doc.setFont('helvetica', 'bold');
-            doc.setFontSize(20);
+            doc.setFontSize(18);
             doc.setTextColor(0, 0, 0);
             doc.text(COMPANY.name, textX, y);
 
             doc.setFont('helvetica', 'normal');
-            doc.setFontSize(10);
-            doc.text(COMPANY.website, textX, y + 16);
-            doc.text(COMPANY.address, textX, y + 30);
+            doc.setFontSize(9);
+            doc.text(COMPANY.website, textX, y + 14);
+            doc.text(COMPANY.address, textX, y + 26);
 
-            y += 55;
+            y += 45;
 
             // Top double rule (formal letterhead look)
             doc.setLineWidth(1.2);
             doc.line(margin, y, pageWidth - margin, y);
             doc.setLineWidth(0.4);
             doc.line(margin, y + 3, pageWidth - margin, y + 3);
-            y += 35;
+            y += 22;
 
             // ---------- Ref No. and Date ----------
             doc.setFont('helvetica', 'normal');
-            doc.setFontSize(10);
+            doc.setFontSize(9);
             if (refNo) {
                 doc.text(`Ref No.: ${refNo}`, margin, y);
             }
             doc.text(`Date: ${letterDate}`, pageWidth - margin, y, { align: 'right' });
-            y += 28;
+            y += 18;
 
             // ---------- To / Recipient ----------
             doc.setFont('helvetica', 'bold');
-            doc.setFontSize(11);
+            doc.setFontSize(9.5);
             doc.text('To,', margin, y);
-            y += 16;
+            y += 12;
             doc.text(internName, margin, y);
-            y += 24;
+            y += 16;
 
             // ---------- Title ----------
             doc.setFont('helvetica', 'bold');
-            doc.setFontSize(14);
+            doc.setFontSize(12);
             doc.text('Letter of Internship Offer', pageWidth / 2, y, { align: 'center' });
-            y += 26;
+            y += 18;
 
             // ---------- Salutation ----------
             doc.setFont('helvetica', 'normal');
-            doc.setFontSize(11);
+            doc.setFontSize(9.5);
             doc.text(`Dear ${internName},`, margin, y);
-            y += 22;
+            y += 14;
 
             // ---------- Intro paragraph ----------
             const introText = `We are pleased to offer you the position of ${role} at ${COMPANY.name}. This letter, together with the terms outlined below, sets out the details of your internship with our organisation. Please read the contents carefully.`;
             const introLines = doc.splitTextToSize(introText, contentWidth);
             doc.text(introLines, margin, y);
-            y += introLines.length * 15 + 18;
+            y += introLines.length * 13 + 12;
 
             // ---------- Section: Terms of Internship ----------
             doc.setFont('helvetica', 'bold');
-            doc.setFontSize(12);
+            doc.setFontSize(10.5);
             doc.text('1. Terms of Internship', margin, y);
-            y += 20;
+            y += 14;
 
             doc.setFont('helvetica', 'normal');
-            doc.setFontSize(11);
+            doc.setFontSize(9.5);
 
             const details = [
                 ['Position', role],
@@ -396,7 +396,7 @@
                 ['Stipend', COMPANY.stipend],
             ];
 
-            const labelWidth = 130;
+            const labelWidth = 120;
             details.forEach(([label, value]) => {
                 if (!value) return;
                 doc.setFont('helvetica', 'bold');
@@ -405,19 +405,19 @@
                 doc.text(':', margin + 14 + labelWidth - 8, y);
                 const valLines = doc.splitTextToSize(String(value), contentWidth - labelWidth - 30);
                 doc.text(valLines, margin + 14 + labelWidth, y);
-                y += Math.max(18, valLines.length * 15);
+                y += Math.max(13, valLines.length * 13);
             });
 
-            y += 6;
+            y += 4;
 
             // ---------- Section: What You Will Get ----------
             doc.setFont('helvetica', 'bold');
-            doc.setFontSize(12);
+            doc.setFontSize(10.5);
             doc.text('2. What You Will Receive', margin, y);
-            y += 20;
+            y += 14;
 
             doc.setFont('helvetica', 'normal');
-            doc.setFontSize(11);
+            doc.setFontSize(9.5);
             const benefits = [
                 'An internship completion certificate (hard copy provided) upon successful completion.',
                 'Guidance and support in building your own portfolio projects.',
@@ -429,19 +429,19 @@
                 const lines = doc.splitTextToSize(b, contentWidth - 20);
                 doc.text('•', margin + 4, y);
                 doc.text(lines, margin + 18, y);
-                y += lines.length * 15;
+                y += lines.length * 13 + 1;
             });
 
-            y += 10;
+            y += 4;
 
             // ---------- Section: Roles & Responsibilities ----------
             doc.setFont('helvetica', 'bold');
-            doc.setFontSize(12);
+            doc.setFontSize(10.5);
             doc.text('3. Roles & Responsibilities', margin, y);
-            y += 20;
+            y += 14;
 
             doc.setFont('helvetica', 'normal');
-            doc.setFontSize(11);
+            doc.setFontSize(9.5);
             const responsibilities = [
                 'Work on assigned and existing projects under the direct guidance of senior developers.',
                 'Follow daily assignments, instructions, and established company workflows.',
@@ -452,25 +452,19 @@
                 const lines = doc.splitTextToSize(b, contentWidth - 20);
                 doc.text('•', margin + 4, y);
                 doc.text(lines, margin + 18, y);
-                y += lines.length * 15;
+                y += lines.length * 13 + 1;
             });
 
-            y += 10;
-
-            // Page-break check before terms/closing
-            if (y > pageHeight - 230) {
-                doc.addPage();
-                y = 60;
-            }
+            y += 4;
 
             // ---------- Section: General Terms ----------
             doc.setFont('helvetica', 'bold');
-            doc.setFontSize(12);
+            doc.setFontSize(10.5);
             doc.text('4. General Terms', margin, y);
-            y += 20;
+            y += 14;
 
             doc.setFont('helvetica', 'normal');
-            doc.setFontSize(11);
+            doc.setFontSize(9.5);
             const generalTerms = [
                 'This offer is extended on the understanding that the information provided by you is accurate and true to the best of your knowledge.',
                 'The Company reserves the right to terminate or extend this internship based on performance, conduct, and organisational requirements.',
@@ -480,45 +474,39 @@
                 const lines = doc.splitTextToSize(b, contentWidth - 20);
                 doc.text('•', margin + 4, y);
                 doc.text(lines, margin + 18, y);
-                y += lines.length * 15;
+                y += lines.length * 13 + 1;
             });
 
-            y += 14;
-
-            // Page-break check before closing
-            if (y > pageHeight - 170) {
-                doc.addPage();
-                y = 60;
-            }
+            y += 6;
 
             // ---------- Closing ----------
             doc.setFont('helvetica', 'normal');
-            doc.setFontSize(11);
+            doc.setFontSize(9.5);
             const closingText = `We are excited to have you join us and look forward to a productive and rewarding internship experience. Please feel free to contact us if you have any questions regarding the terms of this offer.`;
             const closingLines = doc.splitTextToSize(closingText, contentWidth);
             doc.text(closingLines, margin, y);
-            y += closingLines.length * 15 + 14;
+            y += closingLines.length * 13 + 10;
 
             doc.text('Welcome to the team. We wish you a great learning experience ahead!', margin, y);
-            y += 36;
+            y += 24;
 
             // ---------- Signature block ----------
             doc.text('Yours sincerely,', margin, y);
-            y += 18;
+            y += 14;
 
             doc.setFont('helvetica', 'bold');
-            doc.setFontSize(12);
+            doc.setFontSize(10.5);
             doc.text(`For ${COMPANY.name}`, margin, y);
-            y += 50;
+            y += 35;
 
             doc.setFont('helvetica', 'normal');
-            doc.setFontSize(11);
+            doc.setFontSize(9.5);
             doc.text(COMPANY.signatoryDesignation, margin, y);
-            y += 15;
+            y += 13;
             doc.text(COMPANY.name, margin, y);
-            y += 15;
+            y += 13;
             doc.text(`Contact (WhatsApp): ${COMPANY.contactNumber}`, margin, y);
-            y += 15;
+            y += 13;
             doc.text(COMPANY.website, margin, y);
 
             // ---------- Footer on every page ----------
