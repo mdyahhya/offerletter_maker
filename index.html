@@ -313,7 +313,7 @@
 
             // ---------- Letterhead ----------
             y = 30;
-            const logoBoxSize = 68;
+            const logoBoxSize = 58;
             const logoX = margin; // Top left corner
             const logoY = y - 23;
 
@@ -321,6 +321,10 @@
                 // Load from file using fetch (works on Netlify or any web server)
                 logoDataCache = await loadImageAsDataURL(COMPANY.logoPath);
             }
+
+            // Draw a white background box for the logo
+            doc.setFillColor(255, 255, 255);
+            doc.rect(logoX, logoY, logoBoxSize, logoBoxSize, 'F');
 
             if (logoDataCache) {
                 try {
@@ -342,14 +346,14 @@
             doc.text(COMPANY.website, textX, y + 14);
             doc.text(COMPANY.address, textX, y + 26);
 
-            y += 55;
+            y += 45;
 
             // Top double rule (formal letterhead look)
             doc.setLineWidth(1.2);
             doc.line(margin, y, pageWidth - margin, y);
             doc.setLineWidth(0.4);
             doc.line(margin, y + 3, pageWidth - margin, y + 3);
-            y += 16;
+            y += 18;
 
             // ---------- Ref No. and Date ----------
             doc.setFont('helvetica', 'normal');
