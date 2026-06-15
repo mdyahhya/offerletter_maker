@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Offer Letter Maker - Dominal Technology</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -66,6 +67,14 @@
 
         .btn-secondary:hover {
             background: #1d4ed8;
+        }
+
+        .btn-purple {
+            background: #8b5cf6;
+        }
+
+        .btn-purple:hover {
+            background: #7c3aed;
         }
 
         /* Preview Panel Styling */
@@ -220,6 +229,7 @@
                 <button type="button" class="btn-secondary" onclick="updatePreview()">Update Preview</button>
                 <button type="button" onclick="downloadPDF()">Download PDF</button>
             </div>
+            <button type="button" class="btn-purple" style="margin-top: 10px;" onclick="downloadImage()">Download Image (HD PNG)</button>
         </div>
 
         <div class="preview-panel" id="previewPanel">
@@ -586,6 +596,66 @@
             const internName = document.getElementById('internName').value.trim() || 'Intern';
             const fileName = `Offer_Letter_${internName.replace(/\s+/g, '_')}.pdf`;
             doc.save(fileName);
+        }
+
+        async function downloadImage() {
+            const statusEl = document.getElementById('previewStatus');
+            const originalText = statusEl ? statusEl.textContent : 'Ready';
+            if (statusEl) {
+                statusEl.textContent = 'Generating HD Image...';
+                statusEl.style.background = '#fef3c7';
+                statusEl.style.color = '#d97706';
+            }
+
+            try {
+                // Initialize PDF.js worker
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
+                const doc = await buildPDF();
+                const arrayBuffer = doc.output('arraybuffer');
+                
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                const page = await pdf.getPage(1);
+                
+                // Scale 3.5 gives super high definition output (approx 2900x4100 pixels)
+                const scale = 3.5;
+                const viewport = page.getViewport({ scale: scale });
+                
+                const canvas = document.createElement('canvas');
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+                const context = canvas.getContext('2d');
+                
+                // Render page to canvas
+                await page.render({
+                    canvasContext: context,
+                    viewport: viewport
+                }).promise;
+                
+                // Trigger download as PNG
+                const internName = document.getElementById('internName').value.trim() || 'Intern';
+                const link = document.createElement('a');
+                link.href = canvas.toDataURL('image/png');
+                link.download = `Offer_Letter_${internName.replace(/\s+/g, '_')}.png`;
+                link.click();
+
+                if (statusEl) {
+                    statusEl.textContent = 'Image Downloaded';
+                    statusEl.style.background = '#dcfce7';
+                    statusEl.style.color = '#15803d';
+                    setTimeout(() => {
+                        statusEl.textContent = 'Live Preview';
+                        statusEl.style.background = '#e0f2fe';
+                        statusEl.style.color = '#0369a1';
+                    }, 2000);
+                }
+            } catch (error) {
+                console.error("Error generating image:", error);
+                alert('Error generating image. Please make sure preview works first.');
+                if (statusEl) {
+                    statusEl.textContent = originalText;
+                }
+            }
         }
 
         // Render initial preview on page load
